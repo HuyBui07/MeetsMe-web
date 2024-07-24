@@ -1,6 +1,10 @@
 "use client";
 
+import { useState } from "react";
+
 export default function SignIn() {
+  const [error, setError] = useState("");
+
   const handleSignIn = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -18,9 +22,9 @@ export default function SignIn() {
       .then((response) => response.json())
       .then((data) => {
         if (data.accessToken) {
-          localStorage.setItem("accessToken", data.accessToken);
+          console.log("Authenticated")
         } else {
-          alert(data.message);
+          setError(data.message);
         }
       })
       .catch((error) => {
@@ -48,6 +52,7 @@ export default function SignIn() {
           placeholder="Input your password"
           className="border border-black rounded p-2 w-full mb-4"
         />
+        {error && <p className="text-red-500">{error}</p>}
         <button
           type="submit"
           className="bg-black text-white rounded mt-4 w-full h-[20%]"

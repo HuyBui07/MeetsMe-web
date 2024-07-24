@@ -2,8 +2,9 @@ import { NextResponse, NextRequest } from "next/server";
 import bcrypt from "bcrypt";
 import pool from "@/lib/mysql";
 import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest, res: NextResponse) {
   let connection;
   try {
     // Get the user data from the request
@@ -31,18 +32,19 @@ export async function POST(req: NextRequest) {
           secret,
           { expiresIn: "1d" }
         );
-        
-        // Create a NextResponse object
-        const response = NextResponse.next()
-        // Set the httpOnly cookies
-        response.cookies.set("accessToken", accessToken, {
-            httpOnly: true,
-            maxAge: 24 * 60 * 60
-        })
+
+        cookies().set({
+          name: "accessToken",
+          value: accessToken,
+          httpOnly: true,
+          maxAge: 24 * 60 * 60,
+        });
+
+        return NextResponse.json({ message: "Authenticated" }, { status: 200 });
       }
     } else {
       return NextResponse.json(
-        { message: "Username does not exist" },
+        { message: "Username does not exist!" },
         { status: 400 }
       );
     }
