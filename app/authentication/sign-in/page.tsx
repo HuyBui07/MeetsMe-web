@@ -1,3 +1,60 @@
+"use client";
+
 export default function SignIn() {
-  return <text>Sign in</text>;
+  const handleSignIn = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const username = formData.get("username") as string;
+    const password = formData.get("password") as string;
+    console.log(username, password);
+
+    fetch("/api/user/signin", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, password }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.accessToken) {
+          localStorage.setItem("accessToken", data.accessToken);
+        } else {
+          alert(data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
+
+  return (
+    <section className="flex flex-col h-[100vh] w-full pt-5 justify-center items-center">
+      <form onSubmit={handleSignIn} className="w-[30%]">
+        <h1 className="text-3xl pb-4">
+          Sign In To <span className="font-bold">MeetsMe</span>
+        </h1>
+        <label>Username</label>
+        <input
+          name="username"
+          type="text"
+          placeholder="Input your username"
+          className="border border-black rounded p-2 w-full mb-4"
+        />
+        <label>Password</label>
+        <input
+          name="password"
+          type="text"
+          placeholder="Input your password"
+          className="border border-black rounded p-2 w-full mb-4"
+        />
+        <button
+          type="submit"
+          className="bg-black text-white rounded mt-4 w-full h-[20%]"
+        >
+          Sign In
+        </button>
+      </form>
+    </section>
+  );
 }
