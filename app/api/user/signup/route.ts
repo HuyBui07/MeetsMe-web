@@ -1,6 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
 import bcrypt from "bcrypt";
 import pool from "@/lib/mysql";
+import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,14 +19,18 @@ export async function POST(req: NextRequest) {
     const connection = await pool.getConnection();
     
     // Check existed username
-    const rows = await connection.query("SELECT * FROM User WHERE username = ?", [username]);
+    const [rows] = await connection.query("SELECT * FROM User WHERE username = ?", [username]) as any;
+    console.log(rows)
 
     if (rows.length > 0) {
       return NextResponse.json({ message: "Username already exists" }, { status: 400 });
     }
 
     // Insert user
-    await connection.query("INSERT INTO User (username, password) VALUES (?, ?)", [username, hashedPassword]);
+    await connection.query("INSERT INTO User (username, password) VALUES (?, ?)", [username, hashedPassword])
+
+    connection.release()
+
     return NextResponse.json({ message: "User created" }, { status: 201 });
     
   } catch (error) {

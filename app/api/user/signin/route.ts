@@ -40,6 +40,8 @@ export async function POST(req: NextRequest, res: NextResponse) {
           maxAge: 24 * 60 * 60,
         });
 
+        connection.release()
+
         return NextResponse.json({ message: "Authenticated" }, { status: 200 });
       }
     } else {
