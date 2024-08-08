@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { setUsername } from "@/redux/userSlice";
 import Link from "next/link";
 
 export default function SignIn() {
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const [error, setError] = useState("");
 
@@ -28,8 +31,10 @@ export default function SignIn() {
       body: JSON.stringify({ username, password }),
     })
       .then((response) => {
-        if (response.ok) router.push("/home?username=" + username);
-        else return response.json();
+        if (response.ok) {
+          router.push("/home");
+          dispatch(setUsername(username));
+        } else return response.json();
       })
       .then((data: Error) => {
         if (data) {
@@ -69,7 +74,9 @@ export default function SignIn() {
           Sign In
         </button>
       </form>
-      <Link className="mt-5 hover:underline" href={"/authentication/sign-up"}>Click here to sign up</Link>
+      <Link className="mt-5 hover:underline" href={"/authentication/sign-up"}>
+        Click here to sign up
+      </Link>
     </section>
   );
-} 
+}

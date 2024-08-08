@@ -1,11 +1,10 @@
-import { NextResponse } from "next/server";
-import { CustomNextRequest } from "@/types";
+import { NextResponse, NextRequest } from "next/server";
 import pool from "@/lib/mysql";
 
-export async function GET(request: CustomNextRequest) {
+export async function GET(request: NextRequest) {
   let connection;
-  const user_id = request.user.id;
-  console.log(user_id)
+  const user = JSON.parse(request.headers.get("user") || "{}");
+  const user_id = user.id;
 
   try {
     connection = await pool.getConnection();
@@ -17,7 +16,7 @@ export async function GET(request: CustomNextRequest) {
 
     if (groups) {
         const group_list = groups.map((group: any) => ({
-            "group_id": group.id,
+            "group_id": group.group_id,
             "name": group.name
         }))
         console.log(group_list)

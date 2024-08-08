@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import localfont from "next/font/local";
+import store from "@/redux/store";
+import ReduxProvider from "@/redux/provider";
 import "./globals.css";
 
 const comic = localfont({
@@ -23,7 +25,7 @@ export default function RootLayout({
         className={comic.className}
         style={{ height: "100vh", width: "100vw" }}
       >
-        {children}
+        <ReduxProvider>{children}</ReduxProvider>
       </body>
     </html>
   );

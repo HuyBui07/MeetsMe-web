@@ -1,8 +1,21 @@
 import { NextResponse, NextRequest } from "next/server";
 import bcrypt from "bcrypt";
 import pool from "@/lib/mysql";
-import jwt from "jsonwebtoken";
+import { JWTPayload, SignJWT } from "jose";
 import { cookies } from "next/headers";
+
+async function createToken(
+  payload: JWTPayload,
+  secret: string
+): Promise<string> {
+  const secretKey = new TextEncoder().encode(secret);
+  const token = await new SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("1d")
+    .sign(secretKey);
+  return token;
+}
 
 export async function POST(req: NextRequest, res: NextResponse) {
   let connection;
@@ -27,11 +40,8 @@ export async function POST(req: NextRequest, res: NextResponse) {
       const isPasswordValid = await bcrypt.compare(password, hashedPassword);
       if (isPasswordValid) {
         const secret = process.env.NEXTAUTH_SECRET || "defaultSecret";
-        const accessToken = jwt.sign(
-          { id: user.id, username: user.username },
-          secret,
-          { expiresIn: "1d" }
-        );
+        const payload = { id: user.id, username: user.username };
+        const accessToken = await createToken(payload, secret);
 
         cookies().set({
           name: "accessToken",
@@ -40,7 +50,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
           maxAge: 24 * 60 * 60,
         });
 
-        connection.release()
+        connection.release();
 
         return NextResponse.json({ message: "Authenticated" }, { status: 200 });
       }
